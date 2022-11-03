@@ -15,5 +15,7 @@ namespace Persistence
 
         //table Activities in our DB based on Activity class
         public DbSet<Activity> Activities { get; set; }
+
+        public DbSet<Fruit> Fruits { get; set; } //table Fruits
     }
 }
