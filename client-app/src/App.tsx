@@ -7,7 +7,7 @@ import { Header, List } from 'semantic-ui-react';
 function App() {
   const [activities, setActivities] = useState([]);//fetch activities from API server
 
-  useEffect(() => {
+  useEffect(() => {//to use side effect, to get the data from our api
     axios.get('http://localhost:5000/api/activities').then(response => {
       console.log(response);
       setActivities(response.data);
