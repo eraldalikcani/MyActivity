@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Core;
 using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -11,12 +13,20 @@ namespace Application.Activities;
 public class Create
 {
     //Command do not return anything//not like query that returns sth
-    public class Command : IRequest
+    public class Command : IRequest<Result<Unit>>
     {
         public Activity Activity { get; set; }
     }
 
-    public class Handler : IRequestHandler<Command>
+    public class CommandValidator : AbstractValidator<Command>
+    {
+        public CommandValidator()
+        {
+            RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+        }
+    }
+
+    public class Handler : IRequestHandler<Command, Result<Unit>>
     {
         private readonly DataContext _context;
         public Handler(DataContext context)
@@ -24,13 +34,16 @@ public class Create
             _context = context;
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             _context.Activities.Add(request.Activity);
+            //if nothing is written to database then result = false//
+            //if number of changes is greater than zero then result = true
+            var result = await _context.SaveChangesAsync() > 0;
 
-            await _context.SaveChangesAsync();
+            if (!result) return Result<Unit>.Failure("Failed to create activity");
 
-            return Unit.Value;
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }
