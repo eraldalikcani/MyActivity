@@ -23,8 +23,8 @@ namespace Persistence
                 foreach (var user in users)
                 {
                     await userManager.CreateAsync(user, "Pa$$w0rd");
-                };
-            }
+                }
+            };
 
             //if there are any entries in the activities, we will return those entries and not execute the code
             //below, otherwise continue with the next code

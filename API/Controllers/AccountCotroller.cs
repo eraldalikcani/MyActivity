@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Domain;
 using API.DTOs;
+using API.Services;
 
 namespace API.Controllers;
 
@@ -15,9 +16,11 @@ public class AccountCotroller : ControllerBase
 {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-    public AccountCotroller(UserManager<AppUser> userManager, 
-        SignInManager<AppUser> signInManager)
+        private readonly TokenService _tokenService;
+    public AccountCotroller(UserManager<AppUser> userManager,
+        SignInManager<AppUser> signInManager, TokenService tokenService)
     {
+            _tokenService = tokenService;
             _userManager = userManager;
             _signInManager = signInManager;
     }
@@ -37,7 +40,7 @@ public class AccountCotroller : ControllerBase
             {
                 DisplayName = user.DisplayName,
                 Image = null,
-                Token = "This is a token",
+                Token = _tokenService.CreateToken(user),
                 Username = user.UserName
             };
         }

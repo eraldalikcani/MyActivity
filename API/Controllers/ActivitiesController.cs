@@ -5,6 +5,7 @@ using Domain;
 using Microsoft.EntityFrameworkCore;
 using Application.Activities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
@@ -15,6 +16,7 @@ public class ActivitiesController : BaseApiController
         return HandleResult(await Mediator.Send(new List.Query()));//Mediator from BaseApicontroller
     }
 
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetActivity(Guid id){
         return HandleResult(await Mediator.Send(new Details.Query{Id = id}));   
