@@ -9,10 +9,10 @@ using Application.Core;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Extentions;
+namespace API.Extensions;
 
 //we use static because we don't have to create a new instance class when we use extention method
-public static class ApplicationServiceExtentions
+public static class ApplicationServiceExtensions
 {
     //static method
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, 

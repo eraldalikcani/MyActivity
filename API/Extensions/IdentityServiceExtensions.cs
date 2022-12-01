@@ -12,9 +12,9 @@ using Persistence;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace API.Extentions;
+namespace API.Extensions;
 
-public static class IdentityServiceExtentions
+public static class IdentityServiceExtensions
 {
     public static IServiceCollection AddIdentityServices(this IServiceCollection services, 
     IConfiguration config)
@@ -26,7 +26,7 @@ public static class IdentityServiceExtentions
         .AddEntityFrameworkStores<DataContext>()
         .AddSignInManager<SignInManager<AppUser>>();
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super secret key"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt => {
