@@ -5,6 +5,7 @@ import { Form, Label } from 'semantic-ui-react';
 interface Props{
     placeholder: string;
     name: string;
+    type?: string;
     label?: string;
 }
 //!!meta.error if error exists or undefined//turns into boolean'!!'
