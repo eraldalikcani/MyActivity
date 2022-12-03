@@ -29,9 +29,7 @@ namespace Persistence
             //if there are any entries in the activities, we will return those entries and not execute the code
             //below, otherwise continue with the next code
             if (context.Activities.Any()) return;
-            //if there are any entries in the fruits, we will return those entries and not execute the code
-            //below, otherwise continue with the next code
-            if (context.Fruits.Any()) return;
+
             
             var activities = new List<Activity>
             {
@@ -126,27 +124,8 @@ namespace Persistence
                     Venue = "Cinema",
                 }
             };
-            var fruits = new List<Fruit>
-            {
-                new Fruit
-                {
-                    Kind = "Apple",
-                    Kg = 12                   
-                },
-                new Fruit
-                {
-                    Kind = "Lemon",
-                    Kg = 20                   
-                },
-                new Fruit
-                {
-                    Kind = "Kiwi",
-                    Kg = 8                  
-                }              
-            };
             
             await context.Activities.AddRangeAsync(activities);
-            await context.Fruits.AddRangeAsync(fruits);
            
             await context.SaveChangesAsync();
             //---------------------------------------------------------------------------------------

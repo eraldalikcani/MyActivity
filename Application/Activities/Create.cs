@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Core;
+using Application.Interfaces;
 using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Activities;
@@ -29,21 +31,81 @@ public class Create
     public class Handler : IRequestHandler<Command, Result<Unit>>
     {
         private readonly DataContext _context;
-        public Handler(DataContext context)
-        {
-            _context = context;
-        }
+        private readonly IUserAccessor _userAccessor;
+            public Handler(DataContext context, IUserAccessor userAccessor)
+            {
+                _userAccessor = userAccessor;
+                _context = context;
+            }
 
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
-        {
-            _context.Activities.Add(request.Activity);
-            //if nothing is written to database then result = false//
-            //if number of changes is greater than zero then result = true
-            var result = await _context.SaveChangesAsync() > 0;
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(x => 
+                    x.UserName == _userAccessor.GetUsername());
 
-            if (!result) return Result<Unit>.Failure("Failed to create activity");
+                var attendee = new ActivityAttendee
+                {
+                    AppUser = user,
+                    Activity = request.Activity,
+                    IsHost = true
+                };
 
-            return Result<Unit>.Success(Unit.Value);
-        }
+                request.Activity.Attendees.Add(attendee);
+
+                _context.Activities.Add(request.Activity);
+
+                var result = await _context.SaveChangesAsync() > 0;
+                if (!result) return Result<Unit>.Failure("Failed to create activity");
+                return Result<Unit>.Success(Unit.Value);
+            }
     }
 }
+//         private readonly IUserAccessor _userAccessor;
+//         public Handler(DataContext context, IUserAccessor userAccessor)
+//         {
+//             _userAccessor = userAccessor;
+//             _context = context;
+//         }
+
+//         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+//         {
+
+//             // var user = await _context.Users.FirstOrDefaultAsync(x =>
+//             //     x.UserName == _userAccessor.GetUsername());
+
+//             var user = await _context.Users.FirstOrDefaultAsync(x => 
+//                     x.UserName == _userAccessor.GetUsername());    
+
+//             // var attendee = new ActivityAttendee
+//             // {
+//             //     AppUser = user,
+//             //     Activity = request.Activity,
+//             //     IsHost = true
+//             // }; 
+
+//             // request.Activity.Attendees.Add(attendee);   
+
+//             // _context.Activities.Add(request.Activity);
+//             // //if nothing is written to database then result = false//
+//             // //if number of changes is greater than zero then result = true
+//             // var result = await _context.SaveChangesAsync() > 0;
+
+//             var attendee = new ActivityAttendee
+//                 {
+//                     AppUser = user,
+//                     Activity = request.Activity,
+//                     IsHost = true
+//                 };
+
+//                 request.Activity.Attendees.Add(attendee);
+
+//                 _context.Activities.Add(request.Activity);
+
+//                 var result = await _context.SaveChangesAsync() > 0;
+
+//             if (!result) return Result<Unit>.Failure("Failed to create activity");
+
+//             return Result<Unit>.Success(Unit.Value);
+//         }
+//     }
+// }
