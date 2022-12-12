@@ -7,7 +7,7 @@ interface Props {
     activity: Activity
 }
 
-export default observer(function ActivityDetailedSideBar({ activity: { attendees, host } }: Props) {
+export default observer(function ActivityDetailedSidebar ({activity: {attendees, host}}: Props) {
     if (!attendees) return null;
     return (
         <>
@@ -24,16 +24,16 @@ export default observer(function ActivityDetailedSideBar({ activity: { attendees
             <Segment attached>
                 <List relaxed divided>
                     {attendees.map(attendee => (
-                        <Item style={{ position: 'relative' }} key={attendee.username}>
+                        <Item style={{ position: 'relative' }}>
                             {attendee.username === host?.username &&
-                                <Label
-                                    style={{ position: 'absolute' }}
-                                    color='orange'
-                                    ribbon='right'
-                                >
-                                    Host
-                                </Label>}
-                            <Image size='tiny' src={attendee.image || '/assets/user.png'} />
+                            <Label
+                                style={{ position: 'absolute' }}
+                                color='orange'
+                                ribbon='right'
+                            >
+                                Host
+                            </Label>}
+                            <Image size='tiny' src={'/assets/user.png'} />
                             <Item.Content verticalAlign='middle'>
                                 <Item.Header as='h3'>
                                     <Link to={`/profiles/${attendee.username}`}>{attendee.displayName}</Link>
@@ -45,5 +45,6 @@ export default observer(function ActivityDetailedSideBar({ activity: { attendees
                 </List>
             </Segment>
         </>
+
     )
 })
