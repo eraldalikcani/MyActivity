@@ -1,8 +1,9 @@
-import React from 'react';
-import {Card, Icon, Image} from "semantic-ui-react";
-import {Profile} from "../../app/models/profile";
-import {observer} from "mobx-react-lite";
-import {Link} from "react-router-dom";
+import { Card, Icon, Image } from "semantic-ui-react";
+import { Profile } from "../../app/models/profile";
+import { observer } from "mobx-react-lite";
+import { Link } from "react-router-dom";
+import { truncate } from "fs";
+
 
 interface Props {
     profile: Profile
@@ -15,7 +16,7 @@ export default observer(function ProfileCard({profile}: Props) {
             <Card.Content>
                 <Card.Header>{profile.displayName}</Card.Header>
                 <Card.Description>
-                    Bio goes here
+                    {profile?.bio}
                 </Card.Description>
             </Card.Content>
             <Card.Content extra>
