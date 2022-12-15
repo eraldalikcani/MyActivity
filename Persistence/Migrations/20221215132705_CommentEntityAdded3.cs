@@ -4,7 +4,7 @@
 
 namespace Persistence.Migrations
 {
-    public partial class AddCancelledProperty2 : Migration
+    public partial class CommentEntityAdded3 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

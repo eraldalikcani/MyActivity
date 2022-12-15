@@ -43,8 +43,14 @@ public class Edit
             var user = await _context.Users.FirstOrDefaultAsync(x => 
                 x.UserName == _userAccessor.GetUsername());
 
+            //bio from request if it is not null, otherwise the bio of a user//?? coalesce operator
             user.Bio = request.Bio ?? user.Bio;
             user.DisplayName = request.DisplayName ?? user.DisplayName;
+
+            //If we try and update the profile again without changing it 
+            //we will get a 400 bad request as there were no changes to save to the Database
+            //to prevent this we use the following:
+            _context.Entry(user).State = EntityState.Modified;
 
             //number of changes is greater than zero
             var result = await _context.SaveChangesAsync() > 0;

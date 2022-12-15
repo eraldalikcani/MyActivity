@@ -38,6 +38,7 @@ public static class ApplicationServiceExtensions
             services.AddScoped<IUserAccessor, UserAccessor>();//we can get the username of logged user
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
             services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
+            services.AddSignalR();
             
             return services;
     } 
