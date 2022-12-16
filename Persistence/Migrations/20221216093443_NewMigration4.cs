@@ -4,13 +4,16 @@
 
 namespace Persistence.Migrations
 {
-    public partial class CommentEntityAdded3 : Migration
+    /// <inheritdoc />
+    public partial class NewMigration4 : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
 
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
 

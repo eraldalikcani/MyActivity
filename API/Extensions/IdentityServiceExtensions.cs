@@ -1,54 +1,73 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using API.Services;
 using Domain;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Persistence;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using Persistence;
 
-namespace API.Extensions;
-
-public static class IdentityServiceExtensions
+namespace API.Extensions
 {
-    public static IServiceCollection AddIdentityServices(this IServiceCollection services, 
-    IConfiguration config)
+    public static class IdentityServiceExtensions
     {
-        services.AddIdentityCore<AppUser>(opt => 
+        public static IServiceCollection AddIdentityServices(this IServiceCollection services,
+            IConfiguration config)
         {
-            opt.Password.RequireNonAlphanumeric = false;
-        })
-        .AddEntityFrameworkStores<DataContext>()
-        .AddSignInManager<SignInManager<AppUser>>();
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
-
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(opt => {
-                opt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key,
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
-        services.AddAuthorization(opt => {
-            opt.AddPolicy("IsActivityHost", policy => 
+            services.AddIdentityCore<AppUser>(opt =>
             {
-                policy.Requirements.Add(new IsHostRequirement());
-            });
-        });
-        services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
-        services.AddScoped<TokenService>();
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<DataContext>();
 
-        return services;
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = key,
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                    opt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context => 
+                        {
+                            //allow us to get the token from our query string that we send up
+                            //with our signalR connection where we connect with our signalR Hub 
+                            //then we have the ability to send query string used inside the hub itself
+                            //also we get access to Jwt
+                            //and if the path matches the endpoint for signalR
+                            //then we add the token to the context
+                            //this will help us to get the username or anything else from our context
+                            //also authenticate to the signalR Hub
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if(!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsActivityHost", policy =>
+                {
+                    policy.Requirements.Add(new IsHostRequirement());
+                });
+            });
+
+            services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
+            services.AddScoped<TokenService>();
+
+            return services;
+        }
     }
 }

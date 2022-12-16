@@ -1,52 +1,49 @@
-using Microsoft.AspNetCore.Mvc;
-using Persistence;
-using System.Collections.Generic;
-using Domain;
-using Microsoft.EntityFrameworkCore;
 using Application.Activities;
-using MediatR;
+using Domain;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers;
-
-public class ActivitiesController : BaseApiController
+namespace API.Controllers
 {
-    [HttpGet]
-    public async Task<IActionResult> GetActivities()
+    public class ActivitiesController : BaseApiController
     {
-        return HandleResult(await Mediator.Send(new List.Query()));//Mediator from BaseApicontroller
-    }
+        [HttpGet]
+        public async Task<IActionResult> GetActivities()
+        {
+            return HandleResult(await Mediator.Send(new List.Query()));
+        }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetActivity(Guid id)
-    {
-        return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
-    }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetActivity(Guid id)
+        {
+            return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
+        }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateActivity(Activity activity)
-    {
-        return HandleResult(await Mediator.Send(new Create.Command { Activity = activity }));
-    }
+        [HttpPost]
+        public async Task<IActionResult> CreateActivity(Activity activity)
+        {
+            return HandleResult(await Mediator.Send(new Create.Command { Activity = activity }));
+        }
 
-    [Authorize(Policy = "IsActivityHost")]
-    [HttpPut("{id}")]
-    public async Task<IActionResult> EditActivity(Guid id, Activity activity)
-    {
-        activity.Id = id;
-        return HandleResult(await Mediator.Send(new Edit.Command { Activity = activity }));
-    }
+        [Authorize(Policy = "IsActivityHost")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(Guid id, Activity activity)
+        {
+            activity.Id = id;
+            return HandleResult(await Mediator.Send(new Edit.Command { Activity = activity }));
+        }
 
-    [Authorize(Policy = "IsActivityHost")]
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteActivity(Guid id)
-    {
-        return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
-    }
+        [Authorize(Policy = "IsActivityHost")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
+        }
 
-    [HttpPost("{id}/attend")]
-    public async Task<IActionResult> Attend(Guid id)
-    {
-        return HandleResult(await Mediator.Send(new UpdateAttendance.Command { Id = id }));
+        [HttpPost("{id}/attend")]
+        public async Task<IActionResult> Attend(Guid id)
+        {
+            return HandleResult(await Mediator.Send(new UpdateAttendance.Command { Id = id }));
+        }
     }
 }
