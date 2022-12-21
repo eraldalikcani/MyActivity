@@ -12,4 +12,6 @@ public class AppUser : IdentityUser
     public string Bio { get; set; }
     public ICollection<ActivityAttendee> Activities { get; set; }
     public ICollection<Photo> Photos { get; set; }//one to many - a user can have many photos
+    public ICollection<UserFollowing> Followings { get; set; }
+    public ICollection<UserFollowing> Followers { get; set; }
 }
