@@ -26,6 +26,7 @@
     "react-datepicker": "^4.8.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
+    "react-infinite-scroller": "^1.2.6",
     "react-router-dom": "^6.4.5",
     "react-scripts": "5.0.1",
     "react-toastify": "^9.1.1",
@@ -62,6 +63,7 @@
   },
   "devDependencies": {
     "@types/react-datepicker": "^4.8.0",
+    "@types/react-infinite-scroller": "^1.2.3",
     "@types/uuid": "^8.3.4",
     "@types/yup": "^0.32.0"
   }
