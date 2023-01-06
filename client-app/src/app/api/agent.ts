@@ -12,19 +12,23 @@ const sleep = (delay: number) => {
         setTimeout(resolve, delay);
     })
 }
+
 axios.defaults.baseURL = 'http://localhost:5000/api';
+
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
+
 axios.interceptors.request.use(config => {
     const token = store.commonStore.token;
     if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
     return config;
 })
+
 axios.interceptors.response.use(async response => {
     await sleep(1000);
     const pagination = response.headers['pagination'];
-    if(pagination){
+    if (pagination) {
         response.data = new PaginatedResult(response.data, JSON.parse(pagination));
-        return response as AxiosResponse<PaginatedResult<any>>;
+        return response as AxiosResponse<PaginatedResult<any>>
     }
     return response;
 }, (error: AxiosError) => {
@@ -71,7 +75,7 @@ const requests = {
 }
 
 const Activities = {
-    list: (params: URLSearchParams) => axios.get<PaginatedResult<Activity[]>>(`/activities`,{params})
+    list: (params: URLSearchParams) => axios.get<PaginatedResult<Activity[]>>('/activities', { params })
         .then(responseBody),
     details: (id: string) => requests.get<Activity>(`/activities/${id}`),
     create: (activity: ActivityFormValues) => requests.post<void>(`/activities`, activity),
@@ -88,19 +92,19 @@ const Account = {
 
 const Profiles = {
     get: (username: string) => requests.get<Profile>(`/profiles/${username}`),
-    uploadPhoto: (file: Blob) => {
+    uploadPhoto: (file: any) => {
         let formData = new FormData();
         formData.append('File', file);
         return axios.post<Photo>('photos', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
     },
-    setMainPhoto: (id: string) => requests.post(`/photos/${id}/setMain`, {}),
-    deletePhoto: (id: string) => requests.del(`/photos/${id}`),
+    setMainPhoto: (id: string) => axios.post(`/photos/${id}/setMain`, {}),
+    deletePhoto: (id: string) => axios.delete(`/photos/${id}`),
     updateProfile: (profile: Partial<Profile>) => requests.put(`/profiles`, profile),
     updateFollowing: (username: string) => requests.post(`/follow/${username}`, {}),
-    listFollowings: (username: string, predicate: string) => 
-        requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
+    listFollowings: (username: string, predicate: string) => requests
+        .get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
     listActivities: (username: string, predicate: string) =>
         requests.get<UserActivity[]>(`/profiles/${username}/activities?predicate=${predicate}`)
 }

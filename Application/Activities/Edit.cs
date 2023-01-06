@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Core;
 using AutoMapper;
 using Domain;
@@ -9,48 +5,48 @@ using FluentValidation;
 using MediatR;
 using Persistence;
 
-namespace Application.Activities;
-
-public class Edit
+namespace Application.Activities
 {
-    public class Command : IRequest<Result<Unit>> 
+    public class Edit
     {
-        public Activity Activity { get; set; }
-    }
-
-    public class CommandValidator : AbstractValidator<Command>
-    {
-        public CommandValidator()
+        public class Command : IRequest<Result<Unit>>
         {
-            RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+            public Activity Activity { get; set; }
         }
-    }
 
-    public class Handler : IRequestHandler<Command, Result<Unit>>
-    {
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
-
-        public Handler(DataContext context, IMapper mapper)
+        public class CommandValidator : AbstractValidator<Command>
         {
-            _mapper = mapper;
-            _context = context;
+            public CommandValidator()
+            {
+                RuleFor(x => x.Activity).SetValidator(new ActivityValidator());
+            }
         }
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
-            //activity that we are getting from our database
-            var activity = await _context.Activities.FindAsync(request.Activity.Id);
+            private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            if(activity == null) return null;
+            public Handler(DataContext context, IMapper mapper)
+            {
+                _mapper = mapper;
+                _context = context;
+            }
 
-            _mapper.Map(request.Activity, activity);
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+            {
+                var activity = await _context.Activities.FindAsync(request.Activity.Id);
 
-            //number of changes is greater than zero
-            var result = await _context.SaveChangesAsync() > 0;
+                if (activity == null) return null;
 
-            if(!result) return Result<Unit>.Failure("Failed to update activity");
+                _mapper.Map(request.Activity, activity);
 
-            return Result<Unit>.Success(Unit.Value);
+                var result = await _context.SaveChangesAsync() > 0;
+
+                if (!result) return Result<Unit>.Failure("Failed to update activity");
+
+                return Result<Unit>.Success(Unit.Value);
+            }
         }
     }
 }

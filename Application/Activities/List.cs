@@ -1,61 +1,53 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Application.Core;
 using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Domain;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Activities;
-
-public class List
+namespace Application.Activities
 {
-    //will be accessed with List.Query 
-    public class Query : IRequest<Result<PagedList<ActivityDto>>> 
+    public class List
     {
-        public ActivityParams Params { get; set; }
-    }
-
-    public class Handler : IRequestHandler<Query, Result<PagedList<ActivityDto>>>
-    {
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
-        private readonly IUserAccessor _userAccessor;
-
-        public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
+        public class Query : IRequest<Result<PagedList<ActivityDto>>>
         {
-            _userAccessor = userAccessor;
-            _context = context;
-            _mapper = mapper;
+            public ActivityParams Params { get; set; }
         }
 
-        public async Task<Result<PagedList<ActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
+        public class Handler : IRequestHandler<Query, Result<PagedList<ActivityDto>>>
         {
-            var query = _context.Activities
-                .Where(d => d.Date >= request.Params.StartDate)
-                .OrderBy(d => d.Date)
-                .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, 
-                    new {currentUsername = _userAccessor.GetUsername()})
-                .AsQueryable();
+            private readonly DataContext _context;
+            private readonly IMapper _mapper;
+            private readonly IUserAccessor _userAccessor;
+            public Handler(DataContext context, IMapper mapper, IUserAccessor userAccessor)
+            {
+                _userAccessor = userAccessor;
+                _mapper = mapper;
+                _context = context;
+            }
 
-            if(request.Params.IsGoing && !request.Params.IsHost)
+            public async Task<Result<PagedList<ActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                query = query.Where(x => x.Attendees.Any(a => a.Username == _userAccessor.GetUsername()));
+                var query = _context.Activities
+                    .Where(x => x.Date >= request.Params.StartDate)
+                    .OrderBy(d => d.Date)
+                    .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUsername() })
+                    .AsQueryable();
+
+                if (request.Params.IsGoing && !request.Params.IsHost)
+                {
+                    query = query.Where(x => x.Attendees.Any(a => a.Username == _userAccessor.GetUsername()));
+                }
+
+                if (request.Params.IsHost && !request.Params.IsGoing)
+                {
+                    query = query.Where(x => x.HostUsername == _userAccessor.GetUsername());
+                }
+
+                return Result<PagedList<ActivityDto>>
+                    .Success(await PagedList<ActivityDto>.CreateAsync(query,
+                        request.Params.PageNumber, request.Params.PageSize));
             }
-            if(request.Params.IsHost && !request.Params.IsGoing)
-            {
-                query = query.Where(x => x.HostUsername == _userAccessor.GetUsername());
-            }
-            
-            return Result<PagedList<ActivityDto>>.Success(
-                await PagedList<ActivityDto>.CreateAsync(query, request.Params.PageNumber, 
-                    request.Params.PageSize)
-            );
         }
     }
 }
