@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "date-fns": "^2.29.3",
+    "mobx": "^6.7.0",
+    "mobx-react-lite": "^3.4.0",
+    "react": "^18.2.0",
+    "react-router-dom": "^6.6.1",
+    "semantic-ui-react": "^2.1.4"
+  }
+}
